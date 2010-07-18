@@ -123,8 +123,11 @@
             if (tipsy) tipsy[options]();
             return this;
         }
-        
         options = $.extend({}, $.fn.tipsy.defaults, options);
+        
+        function onDocumentScroll(e) {
+            e.data.tipsy.show();
+        }
         
         function get(ele) {
             var tipsy = $.data(ele, 'tipsy');
@@ -140,9 +143,15 @@
             tipsy.hoverState = 'in';
             if (options.delayIn == 0) {
                 tipsy.show();
+                $(document).bind('scroll', {tipsy:tipsy}, onDocumentScroll);
             } else {
                 tipsy.fixTitle();
-                setTimeout(function() { if (tipsy.hoverState == 'in') tipsy.show(); }, options.delayIn);
+                setTimeout(function() {
+                    if (tipsy.hoverState == 'in') {
+                        tipsy.show();
+                        $(document).bind('scroll', {tipsy:tipsy}, onDocumentScroll);
+                    }
+                }, options.delayIn);
             }
         };
         
@@ -151,8 +160,14 @@
             tipsy.hoverState = 'out';
             if (options.delayOut == 0) {
                 tipsy.hide();
+                $(document).unbind('scroll', onDocumentScroll);
             } else {
-                setTimeout(function() { if (tipsy.hoverState == 'out') tipsy.hide(); }, options.delayOut);
+                setTimeout(function() {
+                    if (tipsy.hoverState == 'out') {
+                        tipsy.hide();
+                        $(document).unbind('scroll', onDocumentScroll);
+                    }
+                }, options.delayOut);
             }
         };
         
